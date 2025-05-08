@@ -103,6 +103,7 @@ El código contiene varias vulnerabilidades que pueden ser explotadas para reali
 
 Crear al archivo **login_weak.php** con el siguiente contenido (tencuidado de sustituír **mi_password** por la contraseña de root de tu BBDD:
 
+Para conocer la contraseña, en docker-compose-lamp hay un fichero .env en el que aparece la contraseña de root de la BD 
 ~~~
 <?php
 // creamos la conexión 
@@ -141,6 +142,10 @@ $conn->close();
         <button type="submit">Iniciar Sesión</button>
 </form>
 ~~~
+
+
+
+
 Antes de acceder la página web, asegurarse de que el servicio está en ejecución, y si es necesario, arrancar o reiniciar el servicio.
 
 Acceder a la pagina web aunque también podemos poner directamente el usuario y contraseña. Un ejemplo es  el siguiente enlace:
