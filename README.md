@@ -1,42 +1,60 @@
 # PPS-Unidad3Actividad12-Broken-Authentication
 
+Este contenido corresponde con la actividad 12 de la Unidad de Aprendizaje 3 de Puesta en Producción Segura.
+
+Explotación y Mitigación de Broken Authenticatión.
+
+## Objetivos
+
+- Ver cómo se pueden hacer ataques autenticación.
+
+- Analizar el código de la aplicación que permite ataques de autenticación débil.
+
+- Implementar diferentes modificaciones del codigo para aplicar mitigaciones o soluciones.
 
 ---
-Explotación y Mitigación de Broken Authenticatión().
-Tenemos como objetivo:
 
-> - Ver cómo se pueden hacer ataques autenticación.
->
-> - Analizar el código de la aplicación que permite ataques de autenticación débil.
->
-> - Implementar diferentes modificaciones del codigo para aplicar mitigaciones o soluciones.
+## ¿Qué es Broken Authentication o Autenticación débil?
 
-## ¿Qué es la Autenticación débil?
----
+Son prácticas de seguridad inadecuadas o insuficientes en los mecanismos que usan los sistemas para verificar la identidad de los usuarios.
 
-Algunos sitios web ofrecen un proceso de registro de usuarios que automatiza (o semiautoma) el aprovisionamiento del acceso del sistema a los usuarios. Los requisitos de identidad para el acceso varían de una identificación positiva a ninguna, dependiendo de los requisitos de seguridad del sistema. Muchas aplicaciones públicas automatizan completamente el proceso de registro y aprovisionamiento porque el tamaño de la base de usuarios hace que sea imposible administrar manualmente. Sin embargo, muchas aplicaciones corporativas aprovisionarán a los usuarios manualmente, por lo que este caso de prueba puede no aplicarse.
+Esto significa que un atacante puede acceder a una cuenta sin autorización, comprometiendo de esta manera la confidencialidad e integridad del sistema.
 
-Esto puede incluir credenciales débiles, almacenamiento inseguro de contraseñas, gestión inadecuada de sesiones y falta de protección contra ataques de fuerza bruta.
+Esto se debe por las siguientes características comunes:
 
-**Consecuencias de Autenticación débil:**
+- Uso de contraseñas fáciles de adivinar (como “123456” o “password”).
+
+- No requerir autenticación multifactor (MFA).
+
+- No aplicar restricciones de longitud o complejidad de contraseña.
+
+- Almacenar contraseñas sin cifrado adecuado, como en texto plano.
+
+- Sesiones mal gestionadas, como tokens que no expiran correctamente.
+
+- No proteger contra ataques de fuerza bruta o credenciales reutilizadas.
+
+Como consecuencia de las características anteriores puede suceder: 
+
 - Descubrimiento de credenciales de usuario.
+
 - Ejecución de ataques de suplantación de usuarios. 
 
- 
-## ACTIVIDADES A REALIZAR
 ---
-> Lee detenidamente la sección de vulnerabilidades de subida de archivos.  de la página de PortWigger <https://portswigger.net/web-security/authentication>
->
-> Lee el siguiente [documento sobre Explotación y Mitigación de ataques de Remote Code Execution](./files/ExplotacionYMitigacionBrokenAuthentication.pdf)
-> 
-> También y como marco de referencia, tienes [ la sección de correspondiente de los Procesos de Registros de Usuarios del  **Proyecto Web Security Testing Guide** (WSTG) del proyecto **OWASP**.](https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/03-Identity_Management_Testing/02-Test_User_Registration_Process)>
+ 
+## ACTIVIDADES
 
+- Leer detenidamente [la sección de vulnerabilidades de subida de archivos de la página de PortWigger](https://portswigger.net/web-security/authentication)
 
-Vamos realizando operaciones:
+- Leer el siguiente [documento sobre Explotación y Mitigación de ataques de Remote Code Execution](./files/ExplotacionYMitigacionBrokenAuthentication.pdf)
+
+- También y como marco de referencia, tenemos [la sección de correspondiente de los Procesos de Registros de Usuarios del  **Proyecto Web Security Testing Guide** (WSTG) del proyecto **OWASP**.](https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/03-Identity_Management_Testing/02-Test_User_Registration_Process)>
+
+---
 
 ## Operaciones previas
----
-Antes de comenzar tenemos que realizar varias operaciones previas:
+
+Antes de comenzar vamos a realizar algunas operaciones:
 
 - Iniciar el entorno de pruebas
 
@@ -44,7 +62,6 @@ Antes de comenzar tenemos que realizar varias operaciones previas:
 	- Para esta actividad tenemos una base de datos con nombre usuarios, con campos id, usuario, contrasenya.
 
 - Descargar el diccionario de contraseñas con el que vamos a realizar un ataque de fuerza bruta.
-
 
 
 ### Iniciar entorno de pruebas
