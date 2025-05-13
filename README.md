@@ -309,14 +309,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bind_param("ss", $username, $hashed_password);
 
         if ($stmt->execute()) {
-            echo "✅ Usuario insertado correctamente.";
+            echo " Usuario insertado correctamente.";
         } else {
-            echo "❌ Error al insertar usuario: " . $stmt->error;
+            echo " Error al insertar usuario: " . $stmt->error;
         }
 
         $stmt->close();
     } else {
-        echo "⚠️ Por favor, rellena todos los campos.";
+        echo " Por favor, rellena todos los campos.";
     }
 }
 
@@ -458,12 +458,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || $_SERVER["REQUEST_METHOD"] == "GET")
 
         // Comprobamos si la contraseña ingresada coincide con el hash
         if (password_verify($password, $hashed_password)) {
-            echo "✅ Inicio de sesión exitoso";
+            echo " Inicio de sesión exitoso";
         } else {
-            echo "❌ Usuario o contraseña incorrectos";
+            echo " Usuario o contraseña incorrectos";
         }
     } else {
-        echo "❌ Usuario no encontrado";
+        echo "Usuario no encontrado";
     }
 
     $stmt->close();
@@ -685,7 +685,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->fetch();
 
         if (password_verify($password, $hashed_password)) {
-            // ✅ Login correcto - generar MFA
+            // Login correcto - generar MFA
             $mfa_code = strval(rand(100000, 999999));
             $expires = (new DateTime('+5 minutes'))->format('Y-m-d H:i:s');
 
@@ -701,10 +701,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             header("Location: mostrar_codigo.php?code=$mfa_code");
             exit();
         } else {
-            echo "❌ Contraseña incorrecta.";
+            echo "Contraseña incorrecta.";
         }
     } else {
-        echo "❌ Usuario no encontrado.";
+        echo " Usuario no encontrado.";
     }
     $stmt->close();
 }
@@ -725,7 +725,7 @@ Creamos el archivo **mostrar_codigo.php** con el que visualizaremos el código e
 ```
 <?php
 $code = $_GET["code"] ?? "XXXXXX";
-echo "<h2>🔐 Tu código MFA es: <strong>$code</strong></h2>";
+echo "<h2>Tu código MFA es: <strong>$code</strong></h2>";
 echo "<a href='verificar_mfa.php'>Ir a verificación MFA</a>";
 ?>
 ```
@@ -744,7 +744,7 @@ if ($conn->connect_error) {
 }
 
 if (!isset($_SESSION["mfa_user"])) {
-    die("⚠️ No hay sesión activa para MFA.");
+    die(" No hay sesión activa para MFA.");
 }
 
 $username = $_SESSION["mfa_user"];
@@ -763,7 +763,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $expires_time = new DateTime($mfa_expires);
 
     if ($code_input === $mfa_code && $now < $expires_time) {
-        echo "✅ Autenticación multifactor exitosa. Bienvenido, $username.";
+        echo "Autenticación multifactor exitosa. Bienvenido, $username.";
 
         // Limpieza del código MFA
         $clear = $conn->prepare("UPDATE usuarios SET mfa_code = NULL, mfa_expires = NULL WHERE usuario = ?");
@@ -772,7 +772,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         session_destroy(); // o puedes mantener sesión como autenticado
     } else {
-        echo "❌ Código incorrecto o expirado.";
+        echo "Código incorrecto o expirado.";
     }
     $stmt->close();
 }
@@ -786,7 +786,7 @@ $conn->close();
 ```
 
 
-🧪 Flujo de prueba
+Flujo de prueba
 
 - En login.php, introduces usuario y contraseña.
 
@@ -802,7 +802,7 @@ $conn->close();
 
 
 
-🔒 Flujo completo del Login con MFA
+Flujo completo del Login con MFA
 
 1. Usuario ingresa su usuario y contraseña.
 
