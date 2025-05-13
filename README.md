@@ -52,25 +52,14 @@ Como consecuencia de las características anteriores puede suceder:
 
 ---
 
-## Operaciones previas
-
-Antes de comenzar vamos a realizar algunas operaciones:
-
-- Iniciar el entorno de pruebas
-
-- Comprobar la base de datos con la que vamos a trabajar:
-	- Para esta actividad tenemos una base de datos con nombre usuarios, con campos id, usuario, contrasenya.
-
-- Descargar el diccionario de contraseñas con el que vamos a realizar un ataque de fuerza bruta.
-
 
 ### Iniciar entorno de pruebas
 
 -Situáte en la carpeta de del entorno de pruebas de nuestro servidor LAMP e inicia el esce>
 
-~~~
+```
 docker-compose up -d
-~~~
+```
 
  
 ### Creación de la Base de Datos
@@ -80,12 +69,9 @@ Para realizar esta actividad necesitamos acceder a una Base de datos con usuario
 
 Crea la tabla de usuarios. Debería de mostrarte algó así al acceder a:
 
-~~~
+```
 http://localhost:8080
-~~~
-
-![](images/ba1.png)
-
+```
 
 ### Instalar **hydra** en tu equipos.
 
@@ -93,35 +79,33 @@ Vamos a realizar un ataque de fuerza bruta para intentar recuperar las contrase�
 
 Si tu equipo es Linux, puedes instalarlo con:
 
-~~~
+```
 sudo apt install hydra
-~~~
+```
 
 Si tienes Windows puedes descargarlo desde la página del desarrollador: <https://www.incibe.es/servicio-antibotnet/info/Hydra>
 
 
 ### Descargar el diccionario de contraseñas
 
-Podemos encontrar muchos archivos de contraseñas. Vamos a utilizar el que se encuentra en la siguiente dirección:
- <https://weakpass.com/download/90/rockyou.txt.gz>
+En nuestro caso como usamos Linux accedemos a:
 
-Lo descargarmos dentro de **nuestro equipo, con el que vamos a simular serr nosotros un atacante**,y una vez descargado, lo colocamos en el directorio que deseemos, descargamos con wget y descomprimimos el archivo. En el caso de que utilizemos Linux:
-
-~~~
+```
 cd /usr/share
 wget https://weakpass.com/download/90/rockyou.txt.gz
 gunzip rockyou.txt.gz
-~~~
+```
 
 ## Código vulnerable
----
+
 
 El código contiene varias vulnerabilidades que pueden ser explotadas para realizar ataques de autenticación rota.
 
 Crear al archivo **login_weak.php** con el siguiente contenido (tencuidado de sustituír **mi_password** por la contraseña de root de tu BBDD:
 
-Para conocer la contraseña, en docker-compose-lamp hay un fichero .env en el que aparece la contraseña de root de la BD 
-~~~
+Para conocer la contraseña, en docker-compose-lamp hay un fichero .env en el que aparece la contraseña de root de la BD:
+
+```
 <?php
 // creamos la conexión 
 $conn = new mysqli("database", "root", "MyPassword", "SQLi");
@@ -158,31 +142,29 @@ $conn->close();
         <input type="password" name="password" placeholder="Contrasenya">
         <button type="submit">Iniciar Sesión</button>
 </form>
-~~~
+```
 
-
-
+![](Images/img1.png)
 
 Antes de acceder la página web, asegurarse de que el servicio está en ejecución, y si es necesario, arrancar o reiniciar el servicio.
 
 Acceder a la pagina web aunque también podemos poner directamente el usuario y contraseña. Un ejemplo es  el siguiente enlace:
 
-~~~
+```
 http://localhost/login_weak.php?username=admin&password=123456
-~~~
-
+```
 
 Vemos que si los datos son incorrectos nos muestra que no lo es:
 
-![](images/ba2.png)
+![](Images/img2.png)
 
 Y si es correcta nos lo indica:
 
-![](images/ba3.png)
-
+![](Images/img3.png)
 
 
 **Vulnerabilidades del código:**
+
 1. Inyección SQL: La consulta SQL usa variables sin validación, lo que permite ataques de inyección.
 
 2. Uso de contraseñas en texto plano: No se usa hashing para almacenar las contraseñas, lo que facilita su robo en caso de acceso a la base de datos.
@@ -207,9 +189,9 @@ En esta ocasión vamos a simular ser los atacantes y vamos a hacer un ataque de 
 
 Recordamos que seremos nosotros los atacantes, por eso desde nuestro equipo anfitrión, donde hemos descargado hydra y el diccionario, ejecutamos:
 
-~~~
-hydra -l admin -P /usr/share/rockyou.txt localhost http-post-form "/login_weak.php:username=^USER^&password=^PASS^:Usuario o contraseña incorrectos" -V
-~~~
+```
+__hydra -l admin -P /usr/share/rockyou.txt localhost http-post-form "/login_weak.php:username=^USER^&password=^PASS^:Usuario o contraseña incorrectos" -V__
+```
 
 Explicación de los parámetros:
 
@@ -224,40 +206,41 @@ Explicación de los parámetros:
 	- username=^USER^&password=^PASS^ → Parámetros que se envían en la solicitud POST. Hydra reemplazará ^USER^ y ^PASS^ con los valores de la lista de usuarios y contraseñas.
 
 	- Fallo → Texto que aparece en la respuesta cuando el inicio de sesión falla. Se puede cambiar por el mensaje real de error que muestra la página cuando una contraseña es incorrecta (por ejemplo, "Usuario o contraseña incorrectos").
----
+
 
 Aquí podemos ver cómo lanzamos el comando:
 
-![](images/ba4.png)
+![](Images/img4.png)
 
 Si encontramos un resultado correcto de autenticación, vemos como nos lo muestra:
 
-![](images/ba5.png)
+![](Images/img5.png)
+
+
+---
 
 
 ## Explotación de SQL Injection
----
 
 Cómo ya vimos en la actividad de Inyección de SQL, el atacante puede intentar un payload malicioso en el campo de contraseña:
 
-~~~
+```
 username: admin
 password: ' OR '1'='1
-~~~
+```
 
 Esto convertiría la consulta en:
 
-~~~
+```
 SELECT * FROM users WHERE username = 'admin' AND password = '' OR '1'='1';
-~~~
+```
 
 Debido a que '1'='1' es siempre verdadero, el atacante obtendría acceso.
 
-![](images/ba6.png)
+![](Images/img6.png)
 
 
 ## Mitigación: Código Seguro en PHP
----
 
 ### **Uso de contraseñas cifradas con password_hash**
 ---
@@ -266,37 +249,37 @@ La primera aproximación es no guardar las contraseñas en texto, sino aplicarle
 
 Para almacenar las contraseñas hasheadas, deberemos de modificar la tabla donde guardamos los usuarios, por lo que tenemos que realizar varias operaciones:
 
-> **Modificamos la tabla de contraseñas de la BBDD**
->
-> Ejecutamos la consulta sobre la BBDD 
->
-> Recuerda que:
->
-> - Accedemos al contenedor de la BBDD:
->
-~~~
+**Modificamos la tabla de contraseñas de la BBDD**
+
+Ejecutamos la consulta sobre la BBDD 
+
+Recuerda que:
+
+- Accedemos al contenedor de la BBDD:
+
+```
  docker exec -it lamp-mysql8 /bin/bash
-~~~
->
-> - Nos conectamos a la Base de Datos como usuario root con mysql y despues ejecutar la consulta).
->
-~~~
+```
+
+- Nos conectamos a la Base de Datos como usuario root con mysql y despues ejecutar la consulta).
+
+```
  mysql -u root -p
-~~~
->
-> - Y seleccionamos la BBDD y modificamos la tabla:
->
-~~~
+```
+
+- Y seleccionamos la BBDD y modificamos la tabla:
+
+```
  USE SQLi
  ALTER TABLE usuarios MODIFY contrasenya VARCHAR(255) NOT NULL; 
-~~~
->
-![](images/ba7.png)
+```
+
+![](Images/img7.png)
 
 
->Creamos la función **ạdd_user.php** para introducir los usuarios con su contraseña hasheada (Acuérdate de cambiar MiContraseña por la tuya de root):
+Creamos la función **ạdd_user.php** para introducir los usuarios con su contraseña hasheada (Acuérdate de cambiar MiContraseña por la tuya de root):
 
-~~~
+```
 <?php
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -345,23 +328,25 @@ $conn->close();
     <input type="password" name="password" placeholder="Contrasenya" required>
     <button type="submit">Crear Usuario</button>
 </form>
-~~~
+```
 
 En la función **pasword_hash()"** utilizamos la función por defecto: **PASSWORD_DEFAULT** que usa actualmente **BCRYPT**, pero se actualizará automáticamente en versiones futuras de PHP. Si deseas más control, puedes usar **PASSWORD_BCRYPT** o **PASSWORD_ARGON2ID**.
 
->Como vemos, una vez ejecutado nos informa que el usuario raul con contraseña 123456 ha sido insertado.
->
->![](images/ba8.png)
+Como vemos, una vez ejecutado nos informa que el usuario raul con contraseña 123456 ha sido insertado.
 
- Lo podemos ver accediendo al servicio phpmyadmin: `http://localhost:8080`
+![](Images/img8.png)
 
-![](images/ba9.png)
+Lo podemos ver accediendo al servicio phpmyadmin: `http://localhost:8080`
 
- También puedes obtener los usuarios conectandote a la base de datos y ejecutando la consulta:
+![](Images/img9.png)
 
- ~~~
+También puedes obtener los usuarios conectandote a la base de datos y ejecutando la consulta:
+
+```
 SELECT * from usuarios
-~~~
+```
+
+![](Images/img10.png)
 
 La función **password_hash()** con **PASSWORD_BCRYPT** genera un hash de hasta 60 caracteres, y con
 PASSWORD_ARGON2ID, incluso más (hasta 255). Por eso, se necesita que la columna pueda almacenarlos
@@ -369,7 +354,8 @@ adecuadamente.
 
 Aplicando mitigaciones de uso de contraseñas con password_hash tendríamos el siguiente archivo: **login_weak1.php**:
 (Recuerda que tienes que cambiar miContraseña por tu contraseña de root)
-~~~
+
+```
 <?php
 // creamos la conexión 
 $conn = new mysqli("database", "root", "MyPassword", "SQLi");
@@ -413,25 +399,26 @@ $conn->close();
         <input type="password" name="password" placeholder="Contrasenya">
         <button type="submit">Iniciar Sesión</button>
 </form>
-~~~
+```
 
 Como vemos en la siguiente imagen nos da un login exitoso:
 
-![](images/ba10.png)
+![](Images/img11.png)
+
 
 También puedes probar a usuarlos introduciendo en el navegador:
 
-~~~
+```
 http://localhost/login_weak1.php?username=raul&password=123456
-~~~
+```
 
 Si introducimos datos no correcto dará el mensaje de "Usuario o contraseña no correctos"
 
-~~~
+```
 http://localhost/login_weak1.php?username=raul&password=1234
-~~~
+```
 
-![](images/ba10.png)
+![](Images/img12.png)
 
 
 ### Uso de consultas preparadas
@@ -440,7 +427,7 @@ La siguiente aproximación es usar consultas preparadas, así evitamos ataques d
 
 Creamos el archivo **login_weak2.php** con el siguiente contenido:
 
-~~~
+```
 <?php
 // Conexión
 $conn = new mysqli("database", "root", "MyPassword", "SQLi");
@@ -490,15 +477,15 @@ $conn->close();
     <input type="password" name="password" placeholder="Contrasenya">
     <button type="submit">Iniciar Sesión</button>
 </form>
+```
 
-~~~
 Como vemos, hemos usado consutas paremetrizadas y además hemos utilizado las funciones para manejar las contraseñas hasheadas:
 
->🔐 ¿Cómo funciona?
->
->password_hash($password, PASSWORD_DEFAULT) genera una contraseña hasheada segura.0
->
->password_verify($input, $hash_guardado) verifica si la contraseña ingresada coincide con la almacenada.>
+¿Cómo funciona?
+
+password_hash($password, PASSWORD_DEFAULT) genera una contraseña hasheada segura.0
+
+password_verify($input, $hash_guardado) verifica si la contraseña ingresada coincide con la almacenada.>
 
 
 ### * Implementar bloqueo de cuenta tras varios intentos fallidos
@@ -519,20 +506,22 @@ Para bloquear la cuenta después de 3 intentos fallidos, podemos hacer lo siguie
 
 Accede a la BBDD como hemos hecho al principio de la actividad y modificala de la siguiente forma: 
 
-~~~
+```
 USE SQLi
 ALTER TABLE usuarios ADD failed_attempts INT DEFAULT 0;
 ALTER TABLE usuarios ADD last_attempt TIMESTAMP NULL DEFAULT NULL;
-~~~
+```
+
 Vemos como se han añadido las columnas indicadas:
 
-![](images/ba1.png)
+![](Images/img13.png)
+![](Images/img14.png)
 
 **Código seguro**
 
 Crea el ficher **login_weak3.php** con el siguiete contenido (recuerda cambiar la contraseña):
 
-~~~
+```
 <?php
 // Conexión
 $conn = new mysqli("database", "root", "MyPassword", "SQLi");
@@ -571,7 +560,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || $_SERVER["REQUEST_METHOD"] == "GET")
                 $remaining = 900 - $interval;
                 $minutes = floor($remaining / 60);
                 $seconds = $remaining % 60;
-                echo "⛔ Cuenta bloqueada. Intenta nuevamente en {$minutes} minutos y {$seconds} segundos.";
+                echo "Cuenta bloqueada. Intenta nuevamente en {$minutes} minutos y {$seconds} segundos.";
                 $is_blocked = true;
             }
         }
@@ -579,7 +568,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || $_SERVER["REQUEST_METHOD"] == "GET")
         if (!$is_blocked) {
             // Verificamos contraseña
             if (password_verify($password, $hashed_password)) {
-                echo "✅ Inicio de sesión exitoso";
+                echo "Inicio de sesión exitoso";
 
                 // Reiniciar intentos fallidos
                 $reset_query = "UPDATE usuarios SET failed_attempts = 0, last_attempt = NULL WHERE usuario = ?";
@@ -590,7 +579,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || $_SERVER["REQUEST_METHOD"] == "GET")
             } else {
                 // Incrementar intentos
                 $failed_attempts++;
-                echo "❌ Usuario o contraseña incorrectos (Intento $failed_attempts de 3)";
+                echo "Usuario o contraseña incorrectos (Intento $failed_attempts de 3)";
 
                 $update_query = "UPDATE usuarios SET failed_attempts = ?, last_attempt = NOW() WHERE usuario = ?";
                 $update_stmt = $conn->prepare($update_query);
@@ -600,7 +589,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || $_SERVER["REQUEST_METHOD"] == "GET")
             }
         }
     } else {
-        echo "❌ Usuario no encontrado";
+        echo "Usuario no encontrado";
     }
 
     $stmt->close();
@@ -614,9 +603,10 @@ $conn->close();
     <input type="password" name="password" placeholder="Contrasenya">
     <button type="submit">Iniciar Sesión</button>
 </form>
-~~~
+```
 
-🔍 Qué hace este código:
+
+ Qué hace este código:
 
 - Si el usuario tiene 3 fallos y han pasado menos de 15 minutos, la cuenta se bloquea temporalmente.
 
@@ -624,20 +614,24 @@ $conn->close();
 
 - Si el login es exitoso, se ponen los intentos a cero y se borra el last_attempt.
 
+![](Images/img15.png)
+
 ### Implementar autenticación multifactor (MFA)
 
 Para añadir MFA (Autenticación Multifactor) al sistema de login, seguiremos estos pasos:
 
-> Pasos para Implementar MFA
-> 1. Generar un código de verificación temporal (OTP) de 6 dígitos.
->
-> 2. Enviar el código OTP al usuario mediante correo electrónico o SMS (en este caso, usaremos correo simulado con una archivo PHP.
->
-> 3. Crear un formulario para que el usuario ingrese el código OTP después de iniciar sesión.
->
-> 4. Verificar el código OTP antes de permitir el acceso.
->
-🧩 ¿Qué vamos a crear?
+
+Pasos para Implementar MFA
+
+1. Generar un código de verificación temporal (OTP) de 6 dígitos.
+
+2. Enviar el código OTP al usuario mediante correo electrónico o SMS (en este caso, usaremos correo simulado con una archivo PHP.
+
+3. Crear un formulario para que el usuario ingrese el código OTP después de iniciar sesión.
+
+4. Verificar el código OTP antes de permitir el acceso.
+
+¿Qué vamos a crear?
 
 - Modificaciones en la base de datos:
 
@@ -652,21 +646,22 @@ Para añadir MFA (Autenticación Multifactor) al sistema de login, seguiremos es
 
 	- mostrar_codigo.php: archivo que muestra el código generado.
 
+
 **1. Modificación en la Base de Datos**
 
 Accede a la BBDD como hemos hecho al principio de la actividad y modificala de la siguiente forma: 
 
-~~~
+```
 USE SQLi
 ALTER TABLE usuarios ADD failed_attempts INT DEFAULT 0;
 ALTER TABLE usuarios ADD last_attempt TIMESTAMP NULL DEFAULT NULL;
-~~~
+```
 
-**🔐 2. login_weak4.php (login + generación del código)**
+**2. login_weak4.php (login + generación del código)**
 
 Crea el archivo login_weak4.php con el siguiente contenido (recuerda cambiar la contraseña):
 
-~~~
+```
 <?php
 $conn = new mysqli("database", "root", "MyPassword", "SQLi");
 if ($conn->connect_error) {
@@ -721,28 +716,26 @@ $conn->close();
     <input type="password" name="password" placeholder="Contraseña" required>
     <button type="submit">Iniciar sesión</button>
 </form>
-
-~~~
+```
 
 **🪪 3. mostrar_codigo.php**
 
-
 Creamos el archivo **mostrar_codigo.php** con el que visualizaremos el código enviado. Esto simula el ver el código en el email. 
 
-~~~
+```
 <?php
 $code = $_GET["code"] ?? "XXXXXX";
 echo "<h2>🔐 Tu código MFA es: <strong>$code</strong></h2>";
 echo "<a href='verificar_mfa.php'>Ir a verificación MFA</a>";
 ?>
-~~~
+```
 
 
 **✅ 4. verificar_mfa.php (verificación del código)**
 
 Creamos el archivo **verificar_mfa.php** que nos indicará si el código introducido es correcto (recuerda cambiar la contraseña).
 
-~~~
+```
 <?php
 session_start();
 $conn = new mysqli("database", "root", "MyPassword", "SQLi");
@@ -790,21 +783,22 @@ $conn->close();
     <input type="text" name="mfa_code" placeholder="Código MFA" required>
     <button type="submit">Verificar Código</button>
 </form>
-
-~~~
+```
 
 
 🧪 Flujo de prueba
 
 - En login.php, introduces usuario y contraseña.
 
+![](Images/img16.png)
+
 - Si están bien, se genera un código y vas a mostrar_codigo.php.
 
-![](images/ba13.png)
+![](Images/img17.png)
 
 - Desde ahí, clicas a verificar_mfa.php e introduces el código.
 
-![](images/ba14.png)
+![](Images/img18.png)
 
 
 
@@ -834,13 +828,6 @@ $conn->close();
 
 
 
-
-
-
-
-
-
----
 
 
 > Ángel Pérez Blanco
