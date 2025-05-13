@@ -718,7 +718,7 @@ $conn->close();
 </form>
 ```
 
-**🪪 3. mostrar_codigo.php**
+**3. mostrar_codigo.php**
 
 Creamos el archivo **mostrar_codigo.php** con el que visualizaremos el código enviado. Esto simula el ver el código en el email. 
 
@@ -731,7 +731,7 @@ echo "<a href='verificar_mfa.php'>Ir a verificación MFA</a>";
 ```
 
 
-**✅ 4. verificar_mfa.php (verificación del código)**
+**4. verificar_mfa.php (verificación del código)**
 
 Creamos el archivo **verificar_mfa.php** que nos indicará si el código introducido es correcto (recuerda cambiar la contraseña).
 
@@ -817,13 +817,13 @@ Flujo completo del Login con MFA
 6. Si es correcto, el usuario accede; si no, se muestra un error.
 
 
-🚀 Beneficios de este Sistema MFA
+Beneficios de este Sistema MFA
 
-✔  Mayor seguridad contra accesos no autorizados.
+- Mayor seguridad contra accesos no autorizados.
 
-✔  Protege contra ataques de fuerza bruta, incluso si la contraseña es robada.
+- Protege contra ataques de fuerza bruta, incluso si la contraseña es robada.
 
-✔  Fácil de extender a SMS o aplicaciones como Google Authenticator.
+- Fácil de extender a SMS o aplicaciones como Google Authenticator.
 
 
 
